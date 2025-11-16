@@ -116,7 +116,7 @@ function Publish() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button onClick={async() => { await publishAgent(agent?._id) }}><Upload />Publish</Button>
+                <Button><Upload />Publish</Button>
             </DialogTrigger>
 
             <DialogContent style={{ maxWidth: '60vw', maxHeight: '80vh' }}>

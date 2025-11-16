@@ -63,7 +63,8 @@ export const updateConfig = async (agentId, config) => {
     return JSON.parse(JSON.stringify(agent))
 }
 
-export const publishAgent = async (agentId) => {
+export const getAllAgents = async () => {
     await connectDB();
-    const agent = await Agents.findByIdAndUpdate(agentId, { publish: true }, { new: true });
+    const agents = await Agents.find();
+    return JSON.parse(JSON.stringify(agents));
 }

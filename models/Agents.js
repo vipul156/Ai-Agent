@@ -6,10 +6,6 @@ const AgentsSchema = new Schema({
         type: String,
         required: true
     },
-    publish :{
-        type: Boolean,
-        default: false
-    },
     nodes : {
         type: Array,
     },

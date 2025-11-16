@@ -1,5 +1,4 @@
 'use client'
-import axios from 'axios'
 import { GitBranch } from 'lucide-react'
 import React, { useEffect } from 'react'
 import Link from 'next/link'
