@@ -6,17 +6,15 @@ let cached = global.mongoose;
     cached = global.mongoose = { conn: null, promise: null };
   }
 const connectDB = async () => {
-  if (cached.conn) {
-    return cached.conn;
+  try {
+    const connect = await mongoose.connect(`mongodb://localhost:27017/ai-agent`, {
+      useNewUrlParser: true,
+    });
+    console.log(`MongoDB Connected: {conn.connection.host}`);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
   }
-  
-  cached.promise = mongoose.connect(process.env.MONGODB_URI, {
-    dbName: "ai-agent",
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  cached.conn = await cached.promise;
-  return cached.conn
 }
 
 export default connectDB
