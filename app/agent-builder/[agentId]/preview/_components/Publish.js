@@ -115,7 +115,7 @@ while (!done) {
 function Publish() {
     return (
         <Dialog>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button onClick={async() => { await publishAgent(agent?._id) }}><Upload />Publish</Button>
             </DialogTrigger>
 
