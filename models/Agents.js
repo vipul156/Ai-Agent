@@ -7,7 +7,7 @@ const AgentsSchema = new Schema({
         required: true
     },
     publish :{
-        type: boolean,
+        type: Boolean,
         default: false
     },
     nodes : {
