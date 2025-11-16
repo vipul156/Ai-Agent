@@ -84,9 +84,9 @@ export function AgentMenu({ id }) {
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Input value={`localhost:3000/agent-builder/${id}`} disabled />
+                        <Input value={`process.env.NEXT_PUBLIC_URL/agent-builder/${id}`} disabled />
                         <DialogClose asChild>
-                            <Button onClick={() => navigator.clipboard.writeText(`localhost:3000/agent-builder/${id}`)} variant="outline"><Copy /></Button>
+                            <Button onClick={() => navigator.clipboard.writeText(`process.env.NEXT_PUBLIC_URL/agent-builder/${id}`)} variant="outline"><Copy /></Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>
