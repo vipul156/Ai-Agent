@@ -254,9 +254,3 @@ export async function POST(req) {
 }
 
 // Remove GET endpoint since we don't need conversation IDs anymore
-
-export async function GET(req) {
-  const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  conversationHistory.set(conversationId, []);
-  return NextResponse.json({ conversationId });
-}

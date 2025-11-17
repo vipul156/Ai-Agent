@@ -6,20 +6,24 @@ import IfElseSettings from '../_nodeSetting/IfElseSettings'
 import UserApporval from '../_nodeSetting/UserApporval'
 import { showToast } from 'nextjs-toast-notify';
 import ApiAgentSettings from '../_nodeSetting/ApiSettings'
+import { useReactFlow } from '@xyflow/react';
+import { Trash2 } from 'lucide-react'
 
-function AgentSetting({selectedNodes, setAddedNode}) {
+function AgentSetting({ selectedNodes, setAddedNode }) {
+
+  const { deleteElements } = useReactFlow();
 
   const updateFormData = (formData) => {
     const updatedForm = {
       ...selectedNodes,
-      data : {
+      data: {
         ...selectedNodes.data,
-        label : formData.name || selectedNodes.data.name,
-        settings : formData
+        label: formData.name || selectedNodes.data.name,
+        settings: formData
       }
     }
 
-    setAddedNode((prev)=> prev.map((node) => node.id === selectedNodes.id ? updatedForm : node))
+    setAddedNode((prev) => prev.map((node) => node.id === selectedNodes.id ? updatedForm : node))
     showToast.success("Settings Updated", {
       duration: 4000,
       progress: true,
@@ -27,17 +31,26 @@ function AgentSetting({selectedNodes, setAddedNode}) {
       transition: "bounceIn",
       icon: '',
       sound: true,
-    }); 
+    });
   }
 
-  return (selectedNodes &&
+  const removeNode = () => {
+      const elementsToDelete = {
+        nodes: [selectedNodes],
+        edges: [],
+      };
+      deleteElements(elementsToDelete);
+    }
+
+  return (selectedNodes && selectedNodes.id !== 'start' &&
     <div className='p-5 bg-white rounded-2xl w-[350px] shadow'>
-     {selectedNodes.type === 'AgentNode' && <AgentSettings selectedNodes={selectedNodes} updateFormData={updateFormData}/>}
-     {selectedNodes.type === 'EndNode' && <EndSettings selectedNodes={selectedNodes} updateFormData={updateFormData}/>}
-     {selectedNodes.type === 'WhileNode' && <WhileSettings selectedNodes={selectedNodes} updateFormData={updateFormData}/>}
-     {selectedNodes.type === 'IfElseNode' && <IfElseSettings selectedNodes={selectedNodes} updateFormData={updateFormData}/>}
-     {selectedNodes.type === 'ApiNode' && <ApiAgentSettings selectedNodes={selectedNodes} updateFormData={updateFormData}/>}
-     {selectedNodes.type === 'ApprovalNode' && <UserApporval selectedNodes={selectedNodes} updateFormData={updateFormData}/>}
+      <div onClick={removeNode} className='absolute top-2 right-4 hover:cursor-pointer'><Trash2 /></div>
+      {selectedNodes.type === 'AgentNode' && <AgentSettings selectedNodes={selectedNodes} updateFormData={updateFormData} />}
+      {selectedNodes.type === 'EndNode' && <EndSettings selectedNodes={selectedNodes} updateFormData={updateFormData} />}
+      {selectedNodes.type === 'WhileNode' && <WhileSettings selectedNodes={selectedNodes} updateFormData={updateFormData} />}
+      {selectedNodes.type === 'IfElseNode' && <IfElseSettings selectedNodes={selectedNodes} updateFormData={updateFormData} />}
+      {selectedNodes.type === 'ApiNode' && <ApiAgentSettings selectedNodes={selectedNodes} updateFormData={updateFormData} />}
+      {selectedNodes.type === 'ApprovalNode' && <UserApporval selectedNodes={selectedNodes} updateFormData={updateFormData} />}
     </div>
   )
 }

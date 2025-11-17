@@ -7,7 +7,7 @@ import axios from 'axios'
 import { updateConfig } from '@/actions/useractions'
 import Markdown from 'react-markdown'
 
-function ChatUi({ agent, coversationId, setAgent }) {
+function ChatUi({ agent, setAgent }) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState([])
   const [userInput, setUserInput] = useState('')
@@ -27,7 +27,6 @@ function ChatUi({ agent, coversationId, setAgent }) {
         agents: agent?.agentConfigTool?.agents || [],
         tools: agent?.agentConfigTool?.tools || [],
         input: userInput,
-        conversationId: coversationId
       })
     })
 

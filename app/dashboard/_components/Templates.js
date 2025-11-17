@@ -2,11 +2,21 @@
 import { GitBranch } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { AgentMenu } from './AgentMenu'
+import { Skeleton } from '@/components/ui/skeleton'
 import { getAllAgents } from '@/actions/useractions'
 
 function Templates() {
   const [agentList, setAgentList ] = useState()
+
+  if (!agentList) {
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  }
 
   useEffect(() => {
     getAgents()

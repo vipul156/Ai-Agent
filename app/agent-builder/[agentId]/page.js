@@ -1,7 +1,7 @@
 'use client'
-import React, { use, useCallback, useEffect, useState } from 'react'
+import React, { useRef, useCallback, useEffect, useState } from 'react'
 import Header from '../_components/Header'
-import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Background, BackgroundVariant, Controls, MiniMap, Panel, useOnSelectionChange } from '@xyflow/react';
+import { ReactFlow, applyNodeChanges, reconnectEdge, applyEdgeChanges, addEdge, Background, BackgroundVariant, Controls, MiniMap, Panel, useOnSelectionChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import StartNode from '../_customNodes/StartNode';
 import AgentNode from '../_customNodes/AgentNode';
@@ -20,6 +20,7 @@ import { showToast } from 'nextjs-toast-notify';
 
 
 function AgentBuilder() {
+    const edgeReconnectSuccessful = useRef(true);
     const router = useRouter();
     const { agentId } = useParams();
     const [addedNode, setAddedNode] = useState([{
@@ -75,6 +76,23 @@ function AgentBuilder() {
         setSelectedNode(nodes[0]);
     }, []);
 
+    const onReconnectStart = useCallback(() => {
+        edgeReconnectSuccessful.current = false;
+    }, []);
+
+    const onReconnect = useCallback((oldEdge, newConnection) => {
+        edgeReconnectSuccessful.current = true;
+        setNodeEdges((els) => reconnectEdge(oldEdge, newConnection, els));
+    }, []);
+
+    const onReconnectEnd = useCallback((_, edge) => {
+        if (!edgeReconnectSuccessful.current) {
+            setNodeEdges((eds) => eds.filter((e) => e.id !== edge.id));
+        }
+
+        edgeReconnectSuccessful.current = true;
+    }, []);
+
 
     const handleSave = () => {
         saveNodeEdges(agentId, JSON.parse(JSON.stringify(nodeEdges)), JSON.parse(JSON.stringify(addedNode)))
@@ -89,7 +107,7 @@ function AgentBuilder() {
     }
     return (
         <div>
-            <Header agent={agent}/>
+            <Header agent={agent} />
             <div style={{ width: '100vw', height: '91vh' }}>
                 <ReactFlow
                     nodes={addedNode}
@@ -97,9 +115,14 @@ function AgentBuilder() {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    fitView
                     nodeTypes={nodeTypes}
                     onSelectionChange={onChange}
+                    snapToGrid
+                    onReconnect={onReconnect}
+                    onReconnectStart={onReconnectStart}
+                    onReconnectEnd={onReconnectEnd}
+                    fitView
+                    attributionPosition="top-right"
                 >
                     <Controls />
                     <MiniMap />
@@ -113,7 +136,7 @@ function AgentBuilder() {
                         <AgentPanel addedNode={addedNode} setAddedNode={setAddedNode} />
                     </Panel>
                     <Panel position="top-right" >
-                        <AgentSetting selectedNodes={selectedNode} setAddedNode={setAddedNode}/>
+                        <AgentSetting selectedNodes={selectedNode} setAddedNode={setAddedNode} />
                     </Panel>
                 </ReactFlow>
             </div>

@@ -29,7 +29,6 @@ function Preview() {
     const router = useRouter();
     const { agentId } = useParams();
     const [agent, setAgent] = useState(null)
-    const [conversationId, setConversationId] = useState(null)
     useEffect(() => {
         getAgent()
     }, [])
@@ -40,8 +39,6 @@ function Preview() {
             router.push('/not-found')
         }
         setAgent(Agent)
-        const conversationIdRes = await axios.get('/api/agent-chat');
-        setConversationId(conversationIdRes.data)
     }
 
     return (
@@ -61,7 +58,7 @@ function Preview() {
                     </div>
                 </div>
                 <div className='col-span-2 border m-5 rounded-2xl'>
-                    <ChatUi agent={agent} conversationId={conversationId} setAgent={setAgent}/>
+                    <ChatUi agent={agent} setAgent={setAgent}/>
                 </div>
             </div>
         </div>
