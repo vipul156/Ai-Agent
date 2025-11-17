@@ -12,8 +12,8 @@ import ApprovalNode from '../../_customNodes/ApprovalNode';
 import ChatUi from './_components/ChatUi';
 import { useParams, useRouter } from 'next/navigation';
 import { getAgentbyId } from '@/actions/useractions';
-import axios from 'axios';
 import '@xyflow/react/dist/style.css';
+import { LoaderOne } from '@/components/ui/loader';
 
 
 const nodeTypes = {
@@ -42,26 +42,34 @@ function Preview() {
     }
 
     return (
-        <div>
-            <Header previewHeader={true} agent={agent}/>
-            <div className='grid grid-cols-6'>
-                <div className='p-5 col-span-4 border m-5 rounded-2xl'>
-                    <h2 className='px-5 pb-3 font-semibold text-gray-700'>Preview</h2>
-                    <div className='bg-gray-200 rounded-2xl' style={{ width: '100%', height: '93%' }}>
-                        <ReactFlow
-                            nodes={agent?.nodes}
-                            edges={agent?.edges}
-                            fitView
-                            nodeTypes={nodeTypes}
-                        >
-                        </ReactFlow>
+        <>
+            {!agent && <div className='flex justify-center items-center h-screen'>
+                <LoaderOne />
+            </div>
+            }
+            {agent &&
+                <div>
+                    <Header previewHeader={true} agent={agent} />
+                    <div className='grid grid-cols-6'>
+                        <div className='p-5 col-span-4 border m-5 rounded-2xl'>
+                            <h2 className='px-5 pb-3 font-semibold text-gray-700'>Preview</h2>
+                            <div className='bg-gray-200 rounded-2xl' style={{ width: '100%', height: '93%' }}>
+                                <ReactFlow
+                                    nodes={agent?.nodes}
+                                    edges={agent?.edges}
+                                    fitView
+                                    nodeTypes={nodeTypes}
+                                >
+                                </ReactFlow>
+                            </div>
+                        </div>
+                        <div className='col-span-2 border m-5 rounded-2xl'>
+                            <ChatUi agent={agent} setAgent={setAgent} />
+                        </div>
                     </div>
                 </div>
-                <div className='col-span-2 border m-5 rounded-2xl'>
-                    <ChatUi agent={agent} setAgent={setAgent}/>
-                </div>
-            </div>
-        </div>
+            }
+        </>
     )
 }
 

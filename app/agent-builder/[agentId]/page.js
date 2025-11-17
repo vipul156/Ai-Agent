@@ -17,6 +17,7 @@ import { getAgentbyId, saveNodeEdges } from '@/actions/useractions';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { showToast } from 'nextjs-toast-notify';
+import { LoaderOne } from '@/components/ui/loader';
 
 
 function AgentBuilder() {
@@ -31,7 +32,7 @@ function AgentBuilder() {
     }])
     const [nodeEdges, setNodeEdges] = useState([{ id: 'n1-n2', source: 'n1', target: 'n2' }])
     const [selectedNode, setSelectedNode] = useState([])
-    const [agent, setAgent] = useState({})
+    const [agent, setAgent] = useState()
 
     useEffect(() => {
         getAgent()
@@ -106,42 +107,50 @@ function AgentBuilder() {
         });
     }
     return (
-        <div>
-            <Header agent={agent} />
-            <div style={{ width: '100vw', height: '91vh' }}>
-                <ReactFlow
-                    nodes={addedNode}
-                    edges={nodeEdges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    nodeTypes={nodeTypes}
-                    onSelectionChange={onChange}
-                    snapToGrid
-                    onReconnect={onReconnect}
-                    onReconnectStart={onReconnectStart}
-                    onReconnectEnd={onReconnectEnd}
-                    fitView
-                    attributionPosition="top-right"
-                >
-                    <Controls />
-                    <MiniMap />
-                    <Background
-                        id="1"
-                        gap={25}
-                        color="#f1f1f1"
-                        variant={BackgroundVariant.Lines}
-                    />
-                    <Panel position="top-left" >
-                        <AgentPanel addedNode={addedNode} setAddedNode={setAddedNode} />
-                    </Panel>
-                    <Panel position="top-right" >
-                        <AgentSetting selectedNodes={selectedNode} setAddedNode={setAddedNode} />
-                    </Panel>
-                </ReactFlow>
+        <>
+            {!agent && <div className='flex justify-center items-center h-screen'>
+                <LoaderOne />
             </div>
-            <div className='fixed bottom-10 left-1/2 transition-x-1/2'><Button onClick={handleSave} className={'p-5 text-2xl'}>Save</Button></div>
-        </div>
+            }
+            {agent &&
+                <div>
+                    <Header agent={agent} />
+                    <div style={{ width: '100vw', height: '91vh' }}>
+                        <ReactFlow
+                            nodes={addedNode}
+                            edges={nodeEdges}
+                            onNodesChange={onNodesChange}
+                            onEdgesChange={onEdgesChange}
+                            onConnect={onConnect}
+                            nodeTypes={nodeTypes}
+                            onSelectionChange={onChange}
+                            snapToGrid
+                            onReconnect={onReconnect}
+                            onReconnectStart={onReconnectStart}
+                            onReconnectEnd={onReconnectEnd}
+                            fitView
+                            attributionPosition="top-right"
+                        >
+                            <Controls />
+                            <MiniMap />
+                            <Background
+                                id="1"
+                                gap={25}
+                                color="#f1f1f1"
+                                variant={BackgroundVariant.Lines}
+                            />
+                            <Panel position="top-left" >
+                                <AgentPanel addedNode={addedNode} setAddedNode={setAddedNode} />
+                            </Panel>
+                            <Panel position="top-right" >
+                                <AgentSetting selectedNodes={selectedNode} setAddedNode={setAddedNode} />
+                            </Panel>
+                        </ReactFlow>
+                    </div>
+                    <div className='fixed bottom-10 left-1/2 transition-x-1/2'><Button onClick={handleSave} className={'p-5 text-2xl'}>Save</Button></div>
+                </div>
+            }
+        </>
     )
 }
 
