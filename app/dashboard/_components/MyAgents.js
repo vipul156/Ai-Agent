@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { usePreview } from '@/context/PreviewContext'
 import { AgentMenu } from './AgentMenu'
+import { LoaderOne } from '@/components/ui/loader'
 
 function MyAgents() {
   const { agentList } = usePreview()
@@ -16,7 +17,7 @@ function MyAgents() {
         </div>
       }
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
-        {agentList.data?.map((agent, index) => (
+        {agentList?.data?.map((agent, index) => (
           <div key={index} className='p-5 border rounded-2xl shadow flex justify-between'>
             <Link className='basis-3/4' href={`/agent-builder/${agent._id}`}>
               <GitBranch className='bg-yellow-100 p-2 mb-2 h-10 w-10 rounded-sm' />

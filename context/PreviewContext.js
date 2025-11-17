@@ -17,7 +17,7 @@ const PreviewProvider = ({ children }) => {
         setCurrUser(curr.data)
     }
 
-    const [agentList, setAgentList] = React.useState([])
+    const [agentList, setAgentList] = React.useState()
     useEffect(() => {
         currUser && getMyAgents()
     }, [currUser])
