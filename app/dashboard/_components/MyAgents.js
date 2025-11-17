@@ -18,7 +18,7 @@ function MyAgents() {
       }
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
         {agentList?.data?.map((agent, index) => (
-          <div key={index} className='p-5 border rounded-2xl shadow flex justify-between'>
+          <div key={index} className='border flex justify-between bg-white rounded-xl p-5 shadow-xl relative'>
             <Link className='basis-3/4' href={`/agent-builder/${agent._id}`}>
               <GitBranch className='bg-yellow-100 p-2 mb-2 h-10 w-10 rounded-sm' />
               <h2 className='text-xl px-1'>{agent.name}</h2>

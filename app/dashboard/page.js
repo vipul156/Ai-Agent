@@ -5,7 +5,7 @@ import AiagentTab from './_components/AiagentTab'
 
 function Dashboard() {
   return (
-    <div>
+    <div className='bg-gray-100 min-h-[91.5vh]'>
       <CreateAgentSection />
       <AiagentTab />
     </div>

@@ -5,9 +5,9 @@ import Templates from './Templates'
 
 function AiagentTab() {
     return (
-        <div className='px-10 md:px-24 lg:px-32 mt-20'>
-            <Tabs defaultValue="agents" className="w-full">
-                <TabsList>
+        <div className='px-10 md:px-24 lg:px-32 mt-5'>
+            <Tabs defaultValue="agents" className="w-full my-2">
+                <TabsList className={'border-2 border-black bg-gray-300'}>
                     <TabsTrigger value="agents">My Agents</TabsTrigger>
                     <TabsTrigger value="templates">Templates</TabsTrigger>
                 </TabsList>

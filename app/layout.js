@@ -17,7 +17,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        layout: {
+          unsafe_disableDevelopmentModeWarnings: true,
+        },
+      }}
+    >
       <html lang="en">
         <body
           className={`${outfit.className} antialiased`}
@@ -25,7 +31,7 @@ export default function RootLayout({ children }) {
           <ReactFlowProvider>
             <PreviewProvider>
               {children}
-              </PreviewProvider>
+            </PreviewProvider>
           </ReactFlowProvider>
         </body>
       </html>

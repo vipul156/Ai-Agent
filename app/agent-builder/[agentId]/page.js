@@ -129,6 +129,9 @@ function AgentBuilder() {
                             onReconnectStart={onReconnectStart}
                             onReconnectEnd={onReconnectEnd}
                             fitView
+                            fitViewOptions={{
+                                padding: 0.2,
+                            }}
                             attributionPosition="top-right"
                         >
                             <Controls />
