@@ -70,7 +70,7 @@ function AgentBuilder() {
     );
 
     const onConnect = useCallback(
-        (params) => setNodeEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
+        (params) => setNodeEdges((edgesSnapshot) => addEdge({ ...params, animated: true, style: { strokeWidth: 2 } }, edgesSnapshot)),
         [],
     );
 
