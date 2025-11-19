@@ -52,7 +52,7 @@ function CreateAgentSection() {
                 <p className='text-xl mb-10'>Craft Intelligent workflow instantly</p>
                 <Dialog>
                     <DialogTrigger asChild>
-                        <button className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-gradient-to-r from-gray-800 to-blue-900 text-white shadow-inner">
+                        <button className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-linear-to-r from-gray-800 to-blue-900 text-white shadow-inner">
                             <span className="text-2xl">+</span>
                             <span className="font-medium">Create New Agent</span>
                         </button>
