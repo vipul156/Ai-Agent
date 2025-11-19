@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { usePreview } from '@/context/PreviewContext'
 import { showToast } from 'nextjs-toast-notify'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 
 function CreateAgentSection() {
     const { currUser, setAgentList } = usePreview()
@@ -52,10 +53,18 @@ function CreateAgentSection() {
                 <p className='text-xl mb-10'>Craft Intelligent workflow instantly</p>
                 <Dialog>
                     <DialogTrigger asChild>
-                        <button className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-linear-to-r from-gray-800 to-blue-900 text-white shadow-inner">
+                        <motion.button
+                            initial={{ scale: 1 }}
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatType: "mirror"
+                            }}
+                            className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-linear-to-r from-gray-800 to-blue-900 text-white shadow-inner">
                             <span className="text-2xl">+</span>
                             <span className="font-medium">Create New Agent</span>
-                        </button>
+                        </motion.button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
@@ -73,7 +82,7 @@ function CreateAgentSection() {
                     </DialogContent>
                 </Dialog>
             </div>
-            <Image src="/ai-agent.png" width={300} height={300} alt="agent" />
+            <Image src="/ai-agent.png" width={280} height={280} alt="agent" />
         </div>
     )
 }
