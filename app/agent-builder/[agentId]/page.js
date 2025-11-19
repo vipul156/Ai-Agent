@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { showToast } from 'nextjs-toast-notify';
 import { LoaderOne } from '@/components/ui/loader';
+import ConnectionLine from '../_components/ConnectionLine';
 
 
 function AgentBuilder() {
@@ -124,6 +125,7 @@ function AgentBuilder() {
                             onConnect={onConnect}
                             nodeTypes={nodeTypes}
                             onSelectionChange={onChange}
+                            connectionLineComponent={ConnectionLine}
                             snapToGrid
                             onReconnect={onReconnect}
                             onReconnectStart={onReconnectStart}
