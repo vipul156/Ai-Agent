@@ -49,8 +49,16 @@ function CreateAgentSection() {
     return (
         <div className='px-10 md:px-24 lg:px-32 mt-1 flex justify-between items-center'>
             <div>
-                <h2 className='text-4xl mb-2 font-bold'>Build Powerful AI Agents with Ease</h2>
-                <p className='text-xl mb-10'>Craft Intelligent workflow instantly</p>
+                <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className='text-4xl mb-2 font-bold'>Build Powerful AI Agents with Ease</motion.h2>
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.3 }}
+                    className='text-xl mb-10'>Craft Intelligent workflow instantly</motion.p>
                 <Dialog>
                     <DialogTrigger asChild>
                         <motion.button
@@ -82,7 +90,13 @@ function CreateAgentSection() {
                     </DialogContent>
                 </Dialog>
             </div>
-            <Image src="/ai-agent.png" width={280} height={280} alt="agent" />
+            <motion.div
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+            >
+                <Image src="/ai-agent.png" width={280} height={280} alt="agent" />
+            </motion.div>
         </div>
     )
 }
