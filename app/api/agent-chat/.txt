@@ -1,0 +1,247 @@
+import { NextResponse } from "next/server";
+
+// No persistent storage - each request is independent
+// This significantly reduces memory usage
+
+export async function POST(req) {
+  const { input, tools, agents } = await req.json();
+
+  // Build minimal system prompt with only essential agent instructions
+  const systemPrompt = agents
+    .map((agent) => `${agent.name}: ${agent.instruction}`)
+    .join("\n\n");
+
+  // Prepare the prompt for Colab LLM
+  const fullPrompt = systemPrompt 
+    ? `${systemPrompt}\n\nUser: ${input}\nAssistant:` 
+    : `User: ${input}\nAssistant:`;
+
+  try {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          let fullResponse = "";
+          let shouldContinue = true;
+
+          while (shouldContinue) {
+            // Call Colab LLM API
+            const response = await fetch(process.env.COLAB_API_URL + "/generate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                prompt: fullPrompt,
+                max_new_tokens: 512,  // Changed from max_length
+                temperature: 0.7,
+              }),
+            });
+
+            if (!response.ok) {
+              const error = await response.text();
+              throw new Error(error || "Colab API error");
+            }
+
+            const data = await response.json();
+            const generatedText = data.generated_text;
+            
+            // Extract only the new generated text (remove the prompt)
+            const newText = generatedText.replace(fullPrompt, "").trim();
+            fullResponse = newText;
+
+            // Stream the response character by character for better UX
+            for (let i = 0; i < newText.length; i++) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ text: newText[i] })}\n\n`)
+              );
+              // Small delay to simulate streaming
+              await new Promise(resolve => setTimeout(resolve, 10));
+            }
+
+            // Check if we need to call tools
+            const needsToolCall = tools.length > 0 && shouldCallTool(newText, tools);
+
+            if (needsToolCall) {
+              const toolCall = extractToolCall(newText, tools);
+              
+              if (toolCall) {
+                const toolConfig = tools.find(
+                  (t) => t.name.toLowerCase() === toolCall.toolName.toLowerCase()
+                );
+
+                if (toolConfig) {
+                  try {
+                    let url = toolConfig.url;
+
+                    // Replace placeholders in URL
+                    Object.keys(toolCall.args).forEach(key => {
+                      const placeholder = `{${key}}`;
+                      const legacyPlaceholder = `{{${key}}}`;
+                      if (url.includes(placeholder)) {
+                        url = url.replace(new RegExp(placeholder, 'g'), encodeURIComponent(toolCall.args[key]));
+                      } else if (url.includes(legacyPlaceholder)) {
+                        url = url.replace(new RegExp(legacyPlaceholder, 'g'), encodeURIComponent(toolCall.args[key]));
+                      }
+                    });
+
+                    // Add API key if needed
+                    if (toolConfig.includeApiKey && toolConfig.apiKey) {
+                      url += url.includes("?") ? `&key=${toolConfig.apiKey}` : `?key=${toolConfig.apiKey}`;
+                    }
+
+                    const headers = {};
+                    if (toolConfig.includeApiKey && toolConfig.apiKey) {
+                      headers.Authorization = `Bearer ${toolConfig.apiKey}`;
+                    }
+
+                    // Make API request with timeout
+                    const abortController = new AbortController();
+                    const timeoutId = setTimeout(() => abortController.abort(), 10000);
+
+                    const toolResponse = await fetch(url, {
+                      method: toolConfig.method || "GET",
+                      headers,
+                      signal: abortController.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    const toolData = await toolResponse.json();
+                    const resultText = JSON.stringify(toolData).substring(0, 200);
+                    
+                    controller.enqueue(
+                      encoder.encode(`data: ${JSON.stringify({ text: `\n\n[Tool: ${toolConfig.name}]\nResult: ${resultText}` })}\n\n`)
+                    );
+
+                    // Make another call with tool results
+                    const followUpPrompt = `${fullPrompt}${newText}\n\nTool Result: ${resultText}\n\nAssistant:`;
+                    
+                    const followUpResponse = await fetch(process.env.COLAB_API_URL + "/generate", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        prompt: followUpPrompt,
+                        max_new_tokens: 256,  // Changed from max_length
+                        temperature: 0.7,
+                      }),
+                    });
+
+                    if (followUpResponse.ok) {
+                      const followUpData = await followUpResponse.json();
+                      const followUpText = followUpData.generated_text.replace(followUpPrompt, "").trim();
+                      
+                      for (let i = 0; i < followUpText.length; i++) {
+                        controller.enqueue(
+                          encoder.encode(`data: ${JSON.stringify({ text: followUpText[i] })}\n\n`)
+                        );
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                      }
+                    }
+
+                  } catch (error) {
+                    console.error("Tool execution error:", error);
+                    controller.enqueue(
+                      encoder.encode(`data: ${JSON.stringify({ text: `\n[Error calling tool: ${error.message}]` })}\n\n`)
+                    );
+                  }
+                }
+              }
+              shouldContinue = false;
+            } else {
+              shouldContinue = false;
+            }
+          }
+
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        } catch (error) {
+          console.error("Streaming error:", error);
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ error: error.message })}\n\n`)
+          );
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch (error) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      { error: error.message || "An error occurred" },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to check if the response suggests calling a tool
+function shouldCallTool(text, tools) {
+  const lowerText = text.toLowerCase();
+  return tools.some(tool => 
+    lowerText.includes(tool.name.toLowerCase()) || 
+    lowerText.includes('call') || 
+    lowerText.includes('use tool')
+  );
+}
+
+// Helper function to extract tool call information from text
+function extractToolCall(text, tools) {
+  // Simple pattern matching - you may need to adjust based on your model's output
+  for (const tool of tools) {
+    const toolNameLower = tool.name.toLowerCase();
+    if (text.toLowerCase().includes(toolNameLower)) {
+      // Try to extract arguments (this is a simple implementation)
+      const args = {};
+      Object.keys(tool.parameters).forEach(param => {
+        const regex = new RegExp(`${param}[:\s=]+([^,\n]+)`, 'i');
+        const match = text.match(regex);
+        if (match) {
+          args[param] = match[1].trim().replace(/['"]/g, '');
+        }
+      });
+      
+      if (Object.keys(args).length > 0) {
+        return { toolName: tool.name, args };
+      }
+    }
+  }
+  return null;
+}
+
+// GET endpoint to check API health
+export async function GET(req) {
+  try {
+    // Check if Colab API is accessible
+    const response = await fetch(process.env.COLAB_API_URL + "/health", {
+      method: "GET",
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return NextResponse.json({
+        status: "healthy",
+        colab_api: data,
+        message: "Connected to Colab LLM API"
+      });
+    } else {
+      return NextResponse.json({
+        status: "error",
+        message: "Cannot connect to Colab API"
+      }, { status: 503 });
+    }
+  } catch (error) {
+    return NextResponse.json({
+      status: "error",
+      message: error.message
+    }, { status: 503 });
+  }
+}
